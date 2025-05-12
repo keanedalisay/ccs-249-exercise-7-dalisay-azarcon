@@ -133,12 +133,28 @@ def main():
   hmm = HiddenMarkovModel()
   hmm.train(split_sentences, ne_sentences)
 
-  test_sentence = ['Manila', 'is', 'the', 'capital', 'of', 'the', 'Philippines']
-  test_sentence_labels = ['B-geo', 'O', 'O', 'O', 'O', 'O', 'B-geo']
+  test_sentence = ['Manila', 'is', 'the', 'capital', 'of', 'the', 'Philippines', '.', 'Maria', 'Villafuerte',',', 'a', 'Filipino', 'citizen', ',', 'is', 'a', 'student', 'at', 'the', 'University', 'of', 'the', 'Philippines']
+  test_sentence_labels = ['B-geo', 'O', 'O', 'O', 'O', 'O', 'B-geo', 'O', 'B-per', 'B-per', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-org', 'I-org', 'I-org', 'I-org', 'I-org']
+
   result = hmm.viterbi(test_sentence)
 
-  print(f"Test Sentence: {test_sentence}")
+  print(f"Test Sentence: {test_sentence}\n")
   print(f"Predicted Tags: {result}")
+  print(f"True Tags: {test_sentence_labels}")
+
+  # print(f'\nPrecision: {precision(test_sentence, result, test_sentence_labels)}')
+  print(f'\nRecall: {recall(test_sentence, result, test_sentence_labels)}')
+
+def recall(sentence, predictions, labels):
+  false_negative = 0
+  true_positive = 0
+
+  for i in range(len(sentence)):
+    if (predictions[i] == labels[i]):
+      true_positive += 1
+    false_negative += 1
+
+  return true_positive / (true_positive + false_negative)
 
 if __name__ == '__main__':
   main()

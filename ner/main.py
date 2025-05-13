@@ -44,8 +44,8 @@ class HiddenMarkovModel:
         if split_sentence[j] not in self.word_tag:
           self.word_tag[split_sentence[j]] = tagged_sentence[j]
 
-    self._transmission_probabilities(sentences, tagged_sentences)
-    self._emission_probabilities(sentences, tagged_sentences)
+    self._transmission_probabilities(split_sentences, tagged_sentences)
+    self._emission_probabilities(split_sentences, tagged_sentences)
 
     for tag in self.tag_count:
       self.states.append(tag)
@@ -182,24 +182,29 @@ def main():
   # Accessible at https://www.kaggle.com/datasets/naseralqaydeh/named-entity-recognition-ner-corpus/data
 
   df = pd.read_csv("./ner.csv") # Check sentence #47592 as the number of words does not match the number of tags
-
   sentences = df['Sentence'].to_list()
   tags = df['Tag'].apply(ast.literal_eval)
 
+  test_sentences = [
+    'Manila is the capital of the Philippines . Maria Villafuerte , a Filipino citizen , is a student at the University of the Philippines .',
+    'In Iloilo City , resident Maya Arbolino recounts the crime that happened within the town square of San Joaquin .'
+  ]
+  test_tags = [
+    ['B-geo', 'O', 'O', 'O', 'O', 'O', 'B-geo', 'O', 'B-per', 'B-per', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-org', 'I-org', 'I-org', 'I-org', 'I-org', 'O'],
+    ['O', 'B-geo', 'I-geo', 'O', 'O', 'B-per', 'I-per', 'O', 'O', 'O', 'O' , 'O', 'O', 'O', 'O', 'O', 'O', 'B-geo', 'I-geo', 'O']
+  ]
+
+  # Hidden Markov Model
   hmm = HiddenMarkovModel()
   hmm.train(sentences, tags)
+  result = hmm.viterbi(test_sentences[0].split())
 
-  test_sentence = ['Manila', 'is', 'the', 'capital', 'of', 'the', 'Philippines', '.', 'Maria', 'Villafuerte',',', 'a', 'Filipino', 'citizen', ',', 'is', 'a', 'student', 'at', 'the', 'University', 'of', 'the', 'Philippines']
-  test_sentence_labels = ['B-geo', 'O', 'O', 'O', 'O', 'O', 'B-geo', 'O', 'B-per', 'B-per', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-org', 'I-org', 'I-org', 'I-org', 'I-org']
-
-  result = hmm.viterbi(test_sentence)
-
-  print(f"\nTest Sentence: {test_sentence}\n")
+  print(f"\nTest Sentence: {test_sentences[0]}\n")
   print(f"Predicted Tags: {result}")
-  print(f"True Tags: {test_sentence_labels}")
+  print(f"True Tags: {test_tags[0]}")
 
-  print(f'\nPrecision: {precision_score(result, test_sentence_labels, average="micro", zero_division=0) * 100}%')
-  print(f'Recall: {recall_score(result, test_sentence_labels, average="micro", zero_division=0) * 100}%\n')
+  print(f'\nPrecision: {precision_score(result, test_tags[0], average="micro", zero_division=0) * 100}%')
+  print(f'Recall: {recall_score(result, test_tags[0], average="micro", zero_division=0) * 100}%\n')
 
   # RNN Model
   wc, tc, tagged_sentences = sentence_tagger(sentences, tags)

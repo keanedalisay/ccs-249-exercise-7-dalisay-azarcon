@@ -221,5 +221,14 @@ def main():
   rnn = RNN(vocab_size=len(words), embedding_dim=64, rnn_units=64, num_tags=len(tags))
   rnn.train(X_train, y_train)
 
+  p = rnn.predict(np.array([X_test[0]]))
+  p = np.argmax(p, axis=-1)
+  y_true = np.argmax(y_test, axis=-1)[0]
+
+  print(f"{'Word':15}{'True':5}\t{'Pred'}")
+  print("-"*30)
+  for (w, t, pred) in zip(X_test[0], y_true, p[0]):
+      print(f"{words[w]:15}{tags[t]}\t{tags[pred]}")
+
 if __name__ == '__main__':
   main()

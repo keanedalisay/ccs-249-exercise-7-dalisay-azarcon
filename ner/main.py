@@ -230,5 +230,8 @@ def main():
   for (w, t, pred) in zip(X_test[0], y_true, p[0]):
       print(f"{words[w]:15}{tags[t]}\t{tags[pred]}")
 
+  print(f'Precision: {precision_score(y_true, p[0], average="micro") * 100}%')
+  print(f'Recall: {recall_score(y_true, p[0], average="micro") * 100}%')
+
 if __name__ == '__main__':
   main()

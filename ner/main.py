@@ -227,14 +227,50 @@ def main():
   rnn = RNN(vocab_size=len(words), embedding_dim=64, rnn_units=64, num_tags=len(tags))
   rnn.train(X_train, y_train)
 
-  p = rnn.predict(np.array([X_test[0]]))
+  #-----
+  # For testing NER corpus
+  # p = rnn.predict(np.array([X_test[0]]))
+  # p = np.argmax(p, axis=-1)
+  # y_true = np.argmax(y_test, axis=-1)[0]
+
+  # print(f"{'Word':15}{'True':5}\t{'Pred'}")
+  # print("-"*30)
+  # for (w, t, pred) in zip(X_test[0], y_true, p[0]):
+  #   print(f"{words[w]:15}{tags[t]}\t{tags[pred]}")
+
+  # For testing handmade sentences
+  wc2, tc2, tagged_sentences2 = sentence_tagger(test_sentences, test_tags)
+
+  words2 = list(set(wc2.keys()))
+  tags2 = list(set(tc2.keys()))
+
+  word2idx2 = {w: i for i, w in enumerate(words2)}
+  tag2idx2 = {t: i for i, t in enumerate(tags2)}
+
+  X_test2 = [[word2idx2[w[0]] for w in s] for s in tagged_sentences2]
+
+  X_test2 = sequence.pad_sequences(maxlen=maxlen, sequences=X_test2, padding="post",value=len(words) - 1)
+
+  y_test2 = [[tag2idx[w[1]] for w in s] for s in tagged_sentences2]
+  y_test2 = sequence.pad_sequences(maxlen=maxlen, sequences=y_test2, padding="post", value=tag2idx2["O"])
+  y_test2 = np.array([to_categorical(i, num_classes=len(tags)) for i in y_test2])
+
+
+  p = rnn.predict(np.array([X_test2[0]]))
   p = np.argmax(p, axis=-1)
-  y_true = np.argmax(y_test, axis=-1)[0]
+  y_true = np.argmax(y_test2, axis=-1)[0]
 
   print(f"{'Word':15}{'True':5}\t{'Pred'}")
   print("-"*30)
-  for (w, t, pred) in zip(X_test[0], y_true, p[0]):
+  for (w, t, pred) in zip(X_test2[0], y_true, p[0]):
+    if words2[w] == 'ENDPAD':
+      break
+
+    if w < len(words2):
+      print(f"{words2[w]:15}{tags[t]}\t{tags[pred]}")
+    else:
       print(f"{words[w]:15}{tags[t]}\t{tags[pred]}")
+  #------
 
   print(f'Precision: {precision_score(y_true, p[0], average="micro") * 100}%')
   print(f'Recall: {recall_score(y_true, p[0], average="micro") * 100}%')

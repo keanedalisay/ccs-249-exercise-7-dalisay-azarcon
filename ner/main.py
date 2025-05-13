@@ -25,10 +25,12 @@ class HiddenMarkovModel:
     
 
   def train(self, sentences, tagged_sentences):
-    for i in range(len(sentences)):
+    split_sentences = [sentence.split() for sentence in sentences] 
+
+    for i in range(len(split_sentences)):
       # if (i > 43000):
       #   print(i)
-      split_sentence = sentences[i]
+      split_sentence = split_sentences[i]
       tagged_sentence = tagged_sentences[i]
 
       for j in range(len(split_sentence)):
@@ -182,11 +184,10 @@ def main():
   df = pd.read_csv("./ner.csv") # Check sentence #47592 as the number of words does not match the number of tags
 
   sentences = df['Sentence'].to_list()
-  split_sentences = [sentence.split() for sentence in sentences] 
   tags = df['Tag'].apply(ast.literal_eval)
 
   hmm = HiddenMarkovModel()
-  hmm.train(split_sentences, tags)
+  hmm.train(sentences, tags)
 
   test_sentence = ['Manila', 'is', 'the', 'capital', 'of', 'the', 'Philippines', '.', 'Maria', 'Villafuerte',',', 'a', 'Filipino', 'citizen', ',', 'is', 'a', 'student', 'at', 'the', 'University', 'of', 'the', 'Philippines']
   test_sentence_labels = ['B-geo', 'O', 'O', 'O', 'O', 'O', 'B-geo', 'O', 'B-per', 'B-per', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-org', 'I-org', 'I-org', 'I-org', 'I-org']
